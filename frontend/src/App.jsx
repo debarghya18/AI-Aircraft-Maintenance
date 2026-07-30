@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FlightTrajectory from './components/FlightTrajectory';
 import { fetchHealth, uploadExcelAnalytics, fetchMaintenancePrediction } from './api/client';
 
@@ -10,6 +10,8 @@ export default function App() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
   const [loadingPrediction, setLoadingPrediction] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchHealth()
@@ -20,6 +22,36 @@ export default function App() {
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
+      setErrorMessage(null);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        setSelectedFile(file);
+        setErrorMessage(null);
+      } else {
+        setErrorMessage('Please upload a valid Excel file (.xlsx or .xls).');
+      }
+    }
+  };
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -123,37 +155,47 @@ export default function App() {
             Upload the landed-flight telemetry export and begin the engineering review.
           </p>
 
-          <div className="file-input-box">
-            <label htmlFor="file-upload-input" style={{ cursor: 'pointer', display: 'block' }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1' }}>Engineering Excel (.xlsx)</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginTop: '0.6rem' }}>
-                <button
-                  type="button"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#fff',
-                    padding: '0.45rem 0.9rem',
-                    borderRadius: '0.4rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Choose file
-                </button>
-                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                  {selectedFile ? selectedFile.name : 'No file chosen'}
-                </span>
-              </div>
-            </label>
-            <input
-              id="file-upload-input"
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleFileChange}
-              style={{ display: 'none' }}
-            />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+
+          <div
+            className={`file-input-box ${isDragging ? 'dragging' : ''}`}
+            onClick={triggerFileInput}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            style={{
+              borderColor: isDragging ? '#38bdf8' : undefined,
+              background: isDragging ? 'rgba(56, 189, 248, 0.08)' : undefined,
+            }}
+          >
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1' }}>
+              Engineering Excel (.xlsx)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginTop: '0.6rem' }}>
+              <span
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#fff',
+                  padding: '0.45rem 0.9rem',
+                  borderRadius: '0.4rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  display: 'inline-block',
+                }}
+              >
+                Choose file
+              </span>
+              <span style={{ fontSize: '0.8rem', color: selectedFile ? '#38bdf8' : '#94a3b8', fontWeight: selectedFile ? 600 : 400 }}>
+                {selectedFile ? selectedFile.name : 'No file chosen'}
+              </span>
+            </div>
           </div>
 
           <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1rem', lineHeight: '1.4' }}>
