@@ -92,7 +92,7 @@ export default function App() {
     }
   };
 
-  // Extract dynamic payloads
+  // Extract dynamic payloads - strictly based on code
   const summary = analyticsResult?.summary;
   const currentRecord = summary?.current_record;
   const historicalAnalysis = summary?.historical_analysis || [];
@@ -162,7 +162,7 @@ export default function App() {
           <div className="monitoring-title-label">LIVE FLIGHT MONITORING</div>
           <h2 className="monitoring-headline">
             {currentRecord
-              ? `Flight ${currentRecord.Aircraft_ID || 'AIR-001'} has Landed and is being assessed.`
+              ? `Flight ${currentRecord.Aircraft_ID} has Landed and is being assessed.`
               : 'A landed flight is ready for assessment.'}
           </h2>
           <p className="monitoring-subtext">
@@ -178,99 +178,70 @@ export default function App() {
         </div>
       )}
 
-      {/* Dynamic 9-Header Cards Grid */}
-      <div className="telemetry-header-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-        {/* Card 1: Aircraft */}
-        <div className="telemetry-card">
-          <div className="card-header-row">✈️ AIRCRAFT</div>
-          <div className="card-main-val" style={{ color: '#38bdf8' }}>
-            {currentRecord?.Aircraft_ID || 'AIR-001'}
+      {/* Dynamic 9-Header Cards Grid - Strictly based on API output */}
+      {currentRecord && (
+        <div className="telemetry-header-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className="telemetry-card">
+            <div className="card-header-row">✈️ AIRCRAFT</div>
+            <div className="card-main-val" style={{ color: '#38bdf8' }}>{currentRecord.Aircraft_ID}</div>
+            <div className="card-sub-val">{currentRecord.Aircraft_Model || 'A320neo'}</div>
           </div>
-          <div className="card-sub-val">{currentRecord?.Aircraft_Model || 'A320neo'}</div>
-        </div>
 
-        {/* Card 2: Engine */}
-        <div className="telemetry-card">
-          <div className="card-header-row">⚙️ ENGINE</div>
-          <div className="card-main-val" style={{ color: '#f8fafc', fontSize: '1.15rem' }}>
-            {currentRecord?.Engine_Model || 'CFM LEAP-1A'}
+          <div className="telemetry-card">
+            <div className="card-header-row">⚙️ ENGINE</div>
+            <div className="card-main-val" style={{ color: '#f8fafc', fontSize: '1.15rem' }}>{currentRecord.Engine_Model || 'CFM LEAP-1A'}</div>
+            <div className="card-sub-val">Airport: {currentRecord.Airport_Code || 'DEL'}</div>
           </div>
-          <div className="card-sub-val">Airport: {currentRecord?.Airport_Code || 'DEL'}</div>
-        </div>
 
-        {/* Card 3: Flight Cycle */}
-        <div className="telemetry-card">
-          <div className="card-header-row">🔄 FLIGHT CYCLE</div>
-          <div className="card-main-val" style={{ color: '#f8fafc' }}>
-            {currentRecord?.Flight_Cycle || 101}
+          <div className="telemetry-card">
+            <div className="card-header-row">🔄 FLIGHT CYCLE</div>
+            <div className="card-main-val" style={{ color: '#f8fafc' }}>{currentRecord.Flight_Cycle}</div>
+            <div className="card-sub-val">{currentRecord.Flight_Hours} flight hours logged</div>
           </div>
-          <div className="card-sub-val">{currentRecord?.Flight_Hours || 390} flight hours logged</div>
-        </div>
 
-        {/* Card 4: Since Overhaul */}
-        <div className="telemetry-card">
-          <div className="card-header-row">🔧 SINCE OVERHAUL</div>
-          <div className="card-main-val" style={{ color: '#38bdf8' }}>
-            {currentRecord?.Cycles_Since_Overhaul || 101}
+          <div className="telemetry-card">
+            <div className="card-header-row">🔧 SINCE OVERHAUL</div>
+            <div className="card-main-val" style={{ color: '#38bdf8' }}>{currentRecord.Cycles_Since_Overhaul}</div>
+            <div className="card-sub-val">Last maintenance: {currentRecord.Last_Maintenance_Date}</div>
           </div>
-          <div className="card-sub-val">Last maintenance: {currentRecord?.Last_Maintenance_Date || '2026-10-28'}</div>
-        </div>
 
-        {/* Card 5: Risk Score */}
-        <div className="telemetry-card">
-          <div className="card-header-row">⚠️ RISK SCORE</div>
-          <div className="card-main-val" style={{ color: '#f43f5e' }}>
-            {currentRecord?.Risk_Score || 98}
+          <div className="telemetry-card">
+            <div className="card-header-row">⚠️ RISK SCORE</div>
+            <div className="card-main-val" style={{ color: '#f43f5e' }}>{currentRecord.Risk_Score}</div>
+            <div className="card-sub-val" style={{ color: getTrend('Risk_Score')?.change_percent > 0 ? '#f43f5e' : '#10b981' }}>
+              {getTrend('Risk_Score') ? `${getTrend('Risk_Score').change_percent > 0 ? '+' : ''}${getTrend('Risk_Score').change_percent}% vs history` : 'Computed from baseline'}
+            </div>
           </div>
-          <div className="card-sub-val" style={{ color: getTrend('Risk_Score')?.change_percent > 0 ? '#f43f5e' : '#10b981' }}>
-            {getTrend('Risk_Score')
-              ? `${getTrend('Risk_Score').change_percent > 0 ? '+' : ''}${getTrend('Risk_Score').change_percent}% vs history`
-              : '+32.2% vs history'}
-          </div>
-        </div>
 
-        {/* Card 6: Remaining Life */}
-        <div className="telemetry-card">
-          <div className="card-header-row">🛡️ REMAINING LIFE</div>
-          <div className="card-main-val" style={{ color: '#f59e0b' }}>
-            {currentRecord?.Remaining_Useful_Life || 30} cycles
+          <div className="telemetry-card">
+            <div className="card-header-row">🛡️ REMAINING LIFE</div>
+            <div className="card-main-val" style={{ color: '#f59e0b' }}>{currentRecord.Remaining_Useful_Life} cycles</div>
+            <div className="card-sub-val" style={{ color: '#f59e0b' }}>
+              {getTrend('Remaining_Useful_Life') ? `${getTrend('Remaining_Useful_Life').change_percent}% vs avg` : 'Useful life remaining'}
+            </div>
           </div>
-          <div className="card-sub-val" style={{ color: '#f59e0b' }}>
-            {getTrend('Remaining_Useful_Life')
-              ? `${getTrend('Remaining_Useful_Life').change_percent}% vs avg`
-              : '-13.0% vs avg'}
-          </div>
-        </div>
 
-        {/* Card 7: Vibration */}
-        <div className="telemetry-card">
-          <div className="card-header-row">📊 VIBRATION</div>
-          <div className="card-main-val" style={{ color: '#38bdf8' }}>
-            {currentRecord?.Engine_Vibration || 15} mm/s
+          <div className="telemetry-card">
+            <div className="card-header-row">📊 VIBRATION</div>
+            <div className="card-main-val" style={{ color: '#38bdf8' }}>{currentRecord.Engine_Vibration} mm/s</div>
+            <div className="card-sub-val" style={{ color: '#38bdf8', fontWeight: 600 }}>
+              {getTrend('Engine_Vibration')?.trend_direction || 'ANALYZED'}
+            </div>
           </div>
-          <div className="card-sub-val" style={{ color: '#38bdf8', fontWeight: 600 }}>
-            {getTrend('Engine_Vibration')?.trend_direction || 'INCREASING'}
-          </div>
-        </div>
 
-        {/* Card 8: Signals */}
-        <div className="telemetry-card">
-          <div className="card-header-row">📶 SIGNALS</div>
-          <div className="card-main-val" style={{ color: '#f8fafc' }}>
-            {historicalAnalysis.length || 14}
+          <div className="telemetry-card">
+            <div className="card-header-row">📶 SIGNALS</div>
+            <div className="card-main-val" style={{ color: '#f8fafc' }}>{historicalAnalysis.length}</div>
+            <div className="card-sub-val">Window: {summary?.historical_window_size || 10} cycles</div>
           </div>
-          <div className="card-sub-val">Window: {summary?.historical_window_size || 10} cycles</div>
-        </div>
 
-        {/* Card 9: Ambient */}
-        <div className="telemetry-card">
-          <div className="card-header-row">🌡️ AMBIENT</div>
-          <div className="card-main-val" style={{ color: '#f8fafc' }}>
-            {currentRecord?.Ambient_Temperature !== undefined ? `${currentRecord.Ambient_Temperature}°C` : '30.0°C'}
+          <div className="telemetry-card">
+            <div className="card-header-row">🌡️ AMBIENT</div>
+            <div className="card-main-val" style={{ color: '#f8fafc' }}>{currentRecord.Ambient_Temperature}°C</div>
+            <div className="card-sub-val">Humidity: {currentRecord.Humidity}%</div>
           </div>
-          <div className="card-sub-val">Humidity: {currentRecord?.Humidity !== undefined ? `${currentRecord.Humidity}%` : '150%'}</div>
         </div>
-      </div>
+      )}
 
       {/* Main 3-Column Dashboard Layout */}
       <div className="three-column-grid">
@@ -427,120 +398,138 @@ export default function App() {
             <div>
               {/* Aircraft Summary Badge Bar */}
               <div className="aircraft-summary-badge" style={{ background: 'rgba(56, 189, 248, 0.08)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '0.75rem 1rem', borderRadius: '0.6rem', margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                <span style={{ fontWeight: 700, color: '#ffffff' }}>✈️ {currentRecord.Aircraft_ID || 'AIR-001'} — {currentRecord.Aircraft_Model || 'A320neo'}</span>
+                <span style={{ fontWeight: 700, color: '#ffffff' }}>✈️ {currentRecord.Aircraft_ID} — {currentRecord.Aircraft_Model || 'A320neo'}</span>
                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>🔧 {currentRecord.Engine_Model || 'CFM LEAP-1A'}</span>
                 <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>📍 {currentRecord.Airport_Code || 'DEL'}</span>
-                <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 600 }}>🔄 Cycle {currentRecord.Flight_Cycle || 100}</span>
+                <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 600 }}>🔄 Cycle {currentRecord.Flight_Cycle}</span>
               </div>
 
-              {/* 8 Engine Sensor Gauge Cards Grid (2x4) */}
+              {/* Dynamic 8 Engine Sensor Gauge Cards Grid (2x4) */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <div className="gauge-card">
-                  <div className="gauge-label">ENGINE TEMP</div>
-                  <div className="gauge-val">{currentRecord.Engine_Temperature !== undefined ? `${currentRecord.Engine_Temperature} °C` : '720.9 °C'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Engine_Temperature, 1000)}%`, background: '#f97316' }}></div></div>
-                </div>
+                {currentRecord.Engine_Temperature !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">ENGINE TEMP</div>
+                    <div className="gauge-val">{currentRecord.Engine_Temperature} °C</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Engine_Temperature, 1000)}%`, background: '#f97316' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">EGT</div>
-                  <div className="gauge-val">{currentRecord.Exhaust_Gas_Temperature !== undefined ? `${currentRecord.Exhaust_Gas_Temperature} °C` : '685.1 °C'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Exhaust_Gas_Temperature, 900)}%`, background: '#10b981' }}></div></div>
-                </div>
+                {currentRecord.Exhaust_Gas_Temperature !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">EGT</div>
+                    <div className="gauge-val">{currentRecord.Exhaust_Gas_Temperature} °C</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Exhaust_Gas_Temperature, 900)}%`, background: '#10b981' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">OIL TEMP</div>
-                  <div className="gauge-val">{currentRecord.Oil_Temperature !== undefined ? `${currentRecord.Oil_Temperature} °C` : '102.1 °C'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Oil_Temperature, 200)}%`, background: '#38bdf8' }}></div></div>
-                </div>
+                {currentRecord.Oil_Temperature !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">OIL TEMP</div>
+                    <div className="gauge-val">{currentRecord.Oil_Temperature} °C</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Oil_Temperature, 200)}%`, background: '#38bdf8' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">OIL PRESSURE</div>
-                  <div className="gauge-val">{currentRecord.Oil_Pressure !== undefined ? `${currentRecord.Oil_Pressure} psi` : '47.9 psi'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Oil_Pressure, 100)}%`, background: '#f59e0b' }}></div></div>
-                </div>
+                {currentRecord.Oil_Pressure !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">OIL PRESSURE</div>
+                    <div className="gauge-val">{currentRecord.Oil_Pressure} psi</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Oil_Pressure, 100)}%`, background: '#f59e0b' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">ENGINE RPM</div>
-                  <div className="gauge-val">{currentRecord.Engine_RPM !== undefined ? `${currentRecord.Engine_RPM.toLocaleString()} RPM` : '9,796 RPM'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Engine_RPM, 12000)}%`, background: '#10b981' }}></div></div>
-                </div>
+                {currentRecord.Engine_RPM !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">ENGINE RPM</div>
+                    <div className="gauge-val">{currentRecord.Engine_RPM.toLocaleString()} RPM</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Engine_RPM, 12000)}%`, background: '#10b981' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">FUEL FLOW</div>
-                  <div className="gauge-val">{currentRecord.Fuel_Flow !== undefined ? `${currentRecord.Fuel_Flow.toLocaleString()} kg/h` : '2,456.8 kg/h'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Fuel_Flow, 4000)}%`, background: '#38bdf8' }}></div></div>
-                </div>
+                {currentRecord.Fuel_Flow !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">FUEL FLOW</div>
+                    <div className="gauge-val">{currentRecord.Fuel_Flow.toLocaleString()} kg/h</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Fuel_Flow, 4000)}%`, background: '#38bdf8' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">COMPRESSOR</div>
-                  <div className="gauge-val">{currentRecord.Compressor_Pressure !== undefined ? `${currentRecord.Compressor_Pressure} psi` : '44.6 psi'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Compressor_Pressure, 80)}%`, background: '#10b981' }}></div></div>
-                </div>
+                {currentRecord.Compressor_Pressure !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">COMPRESSOR</div>
+                    <div className="gauge-val">{currentRecord.Compressor_Pressure} psi</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Compressor_Pressure, 80)}%`, background: '#10b981' }}></div></div>
+                  </div>
+                )}
 
-                <div className="gauge-card">
-                  <div className="gauge-label">HYDRAULIC</div>
-                  <div className="gauge-val">{currentRecord.Hydraulic_Pressure !== undefined ? `${currentRecord.Hydraulic_Pressure.toLocaleString()} psi` : '3,017.9 psi'}</div>
-                  <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Hydraulic_Pressure, 4000)}%`, background: '#f43f5e' }}></div></div>
-                </div>
+                {currentRecord.Hydraulic_Pressure !== undefined && (
+                  <div className="gauge-card">
+                    <div className="gauge-label">HYDRAULIC</div>
+                    <div className="gauge-val">{currentRecord.Hydraulic_Pressure.toLocaleString()} psi</div>
+                    <div className="gauge-bar-bg"><div className="gauge-bar-fill" style={{ width: `${getGaugePercent(currentRecord.Hydraulic_Pressure, 4000)}%`, background: '#f43f5e' }}></div></div>
+                  </div>
+                )}
               </div>
 
-              {/* Dynamic Signal Trends Table (Renders ALL 14 parameters) */}
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Signal Trends</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>
-                    {historicalAnalysis.length} parameters
-                  </span>
-                </div>
+              {/* Dynamic Signal Trends Table (Renders ALL items in historicalAnalysis) */}
+              {historicalAnalysis.length > 0 && (
+                <div style={{ marginTop: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Signal Trends</h4>
+                    <span style={{ fontSize: '0.75rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}>
+                      {historicalAnalysis.length} parameters
+                    </span>
+                  </div>
 
-                <div className="trends-table-container" style={{ overflowX: 'auto', maxHeight: '320px', overflowY: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textLeft: 'left' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#94a3b8' }}>
-                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>PARAMETER</th>
-                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>CURRENT</th>
-                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>CHANGE</th>
-                        <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>TREND</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {historicalAnalysis.map((item, idx) => (
-                        <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                          <td style={{ padding: '0.5.rem 0.75rem', color: '#cbd5e1', fontWeight: 500 }}>{formatParamName(item.column)}</td>
-                          <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'JetBrains Mono', color: '#f8fafc' }}>{item.latest_value}</td>
-                          <td style={{ padding: '0.5rem 0.75rem', color: item.change_percent > 0 ? '#f43f5e' : item.change_percent < 0 ? '#38bdf8' : '#94a3b8' }}>
-                            {item.change_percent > 0 ? '+' : ''}{item.change_percent}%
-                          </td>
-                          <td style={{ padding: '0.5rem 0.75rem' }}>
-                            <span
-                              style={{
-                                fontSize: '0.7rem',
-                                fontWeight: 700,
-                                padding: '0.15rem 0.45rem',
-                                borderRadius: '0.25rem',
-                                background:
-                                  item.trend_direction === 'INCREASING'
-                                    ? 'rgba(244, 63, 94, 0.15)'
-                                    : item.trend_direction === 'DECREASING'
-                                    ? 'rgba(56, 189, 248, 0.15)'
-                                    : 'rgba(148, 163, 184, 0.15)',
-                                color:
-                                  item.trend_direction === 'INCREASING'
-                                    ? '#f43f5e'
-                                    : item.trend_direction === 'DECREASING'
-                                    ? '#38bdf8'
-                                    : '#94a3b8',
-                              }}
-                            >
-                              {item.trend_direction}
-                            </span>
-                          </td>
+                  <div className="trends-table-container" style={{ overflowX: 'auto', maxHeight: '320px', overflowY: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#94a3b8' }}>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>PARAMETER</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>CURRENT</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>CHANGE</th>
+                          <th style={{ padding: '0.5rem 0.75rem', fontWeight: 600 }}>TREND</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {historicalAnalysis.map((item, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                            <td style={{ padding: '0.5rem 0.75rem', color: '#cbd5e1', fontWeight: 500 }}>{formatParamName(item.column)}</td>
+                            <td style={{ padding: '0.5rem 0.75rem', fontFamily: 'JetBrains Mono', color: '#f8fafc' }}>{item.latest_value}</td>
+                            <td style={{ padding: '0.5rem 0.75rem', color: item.change_percent > 0 ? '#f43f5e' : item.change_percent < 0 ? '#38bdf8' : '#94a3b8' }}>
+                              {item.change_percent > 0 ? '+' : ''}{item.change_percent}%
+                            </td>
+                            <td style={{ padding: '0.5rem 0.75rem' }}>
+                              <span
+                                style={{
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  padding: '0.15rem 0.45rem',
+                                  borderRadius: '0.25rem',
+                                  background:
+                                    item.trend_direction === 'INCREASING'
+                                      ? 'rgba(244, 63, 94, 0.15)'
+                                      : item.trend_direction === 'DECREASING'
+                                      ? 'rgba(56, 189, 248, 0.15)'
+                                      : 'rgba(148, 163, 184, 0.15)',
+                                  color:
+                                    item.trend_direction === 'INCREASING'
+                                      ? '#f43f5e'
+                                      : item.trend_direction === 'DECREASING'
+                                      ? '#38bdf8'
+                                      : '#94a3b8',
+                                }}
+                              >
+                                {item.trend_direction}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -571,21 +560,27 @@ export default function App() {
               {/* AI Analysis Header Bar */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(192, 132, 252, 0.1)', padding: '0.6rem 0.85rem', borderRadius: '0.5rem', border: '1px solid rgba(192, 132, 252, 0.2)' }}>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#c084fc' }}>
-                  🧠 AI ANALYSIS — {report.aircraft || 'AIR-001'} • {report.aircraft_model || 'A320neo'}
+                  🧠 AI ANALYSIS — {report.aircraft || currentRecord?.Aircraft_ID} • {report.aircraft_model || currentRecord?.Aircraft_Model}
                 </span>
               </div>
 
               {/* Status Badges Row */}
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <span style={{ background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  🟡 {report.health_status || 'MONITOR'}
-                </span>
-                <span style={{ background: 'rgba(249, 115, 22, 0.2)', border: '1px solid rgba(249, 115, 22, 0.4)', color: '#f97316', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  🟠 {report.risk_level || 'MEDIUM RISK'}
-                </span>
-                <span style={{ background: report.safe_for_next_flight !== false ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)', border: report.safe_for_next_flight !== false ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(244, 63, 94, 0.4)', color: report.safe_for_next_flight !== false ? '#10b981' : '#f43f5e', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  {report.safe_for_next_flight !== false ? '🟢 SAFE FOR FLIGHT' : '🔴 GROUND AIRCRAFT'}
-                </span>
+                {report.health_status && (
+                  <span style={{ background: 'rgba(245, 158, 11, 0.2)', border: '1px solid rgba(245, 158, 11, 0.4)', color: '#fbbf24', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                    🟡 {report.health_status}
+                  </span>
+                )}
+                {report.risk_level && (
+                  <span style={{ background: 'rgba(249, 115, 22, 0.2)', border: '1px solid rgba(249, 115, 22, 0.4)', color: '#f97316', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                    🟠 {report.risk_level} RISK
+                  </span>
+                )}
+                {report.safe_for_next_flight !== undefined && (
+                  <span style={{ background: report.safe_for_next_flight ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)', border: report.safe_for_next_flight ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(244, 63, 94, 0.4)', color: report.safe_for_next_flight ? '#10b981' : '#f43f5e', padding: '0.25rem 0.65rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                    {report.safe_for_next_flight ? '🟢 SAFE FOR FLIGHT' : '🔴 GROUND AIRCRAFT'}
+                  </span>
+                )}
               </div>
 
               {/* Summary Quote Box */}
@@ -602,7 +597,7 @@ export default function App() {
                     {report.final_flight_decision.can_fly_now ? '✅ FLY WITH MONITORING' : '🔴 GROUND AIRCRAFT IMMEDIATELY'}
                   </div>
                   <div style={{ fontWeight: 700, color: '#ffffff', marginTop: '0.35rem', fontSize: '0.85rem' }}>
-                    {report.final_flight_decision.ui_statement || 'Aircraft may fly with increased monitoring.'}
+                    {report.final_flight_decision.ui_statement}
                   </div>
                   {report.final_flight_decision.required_before_next_flight && (
                     <div style={{ fontSize: '0.775rem', color: '#cbd5e1', marginTop: '0.35rem' }}>
@@ -622,7 +617,7 @@ export default function App() {
                     {report.threshold_violations.map((viol, idx) => (
                       <div key={idx} style={{ background: 'rgba(244, 63, 94, 0.06)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: '0.8rem', borderRadius: '0.5rem' }}>
                         <div style={{ fontWeight: 700, color: '#fca5a5', fontSize: '0.85rem' }}>{viol.parameter}</div>
-                        <div style={{ display: 'flex', justify: 'space-between', fontSize: '0.75rem', marginTop: '0.3rem', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginTop: '0.3rem', color: '#94a3b8' }}>
                           <span>OBSERVED: <strong style={{ color: '#f43f5e' }}>{viol.observed_value}</strong></span>
                           <span>THRESHOLD: <strong style={{ color: '#f8fafc' }}>{viol.manual_threshold}</strong></span>
                         </div>
