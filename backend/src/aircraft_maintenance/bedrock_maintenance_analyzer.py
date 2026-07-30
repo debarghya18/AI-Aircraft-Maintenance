@@ -178,19 +178,27 @@ Return exactly one JSON object with this schema:
         prompt = self.build_prompt(engineering_analytics)
         manual_bytes = self.load_manual()
 
+        user_content = [{"text": prompt}]
+
+        if manual_bytes.startswith(b"%PDF-"):
+            user_content.append({
+                "document": {
+                    "format": "pdf",
+                    "name": self._document_name(),
+                    "source": {"bytes": manual_bytes},
+                }
+            })
+        else:
+            try:
+                manual_text = manual_bytes.decode("utf-8", errors="ignore")
+                user_content.append({"text": f"\n\nInternal Maintenance Manual Context:\n{manual_text}"})
+            except Exception:
+                pass
+
         conversation = [
             {
                 "role": "user",
-                "content": [
-                    {"text": prompt},
-                    {
-                        "document": {
-                            "format": "pdf",
-                            "name": self._document_name(),
-                            "source": {"bytes": manual_bytes},
-                        }
-                    },
-                ],
+                "content": user_content,
             }
         ]
 

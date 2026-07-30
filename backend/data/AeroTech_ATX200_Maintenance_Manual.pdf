@@ -1,1 +1,55 @@
-AeroTech ATX200 Maintenance Manual Content
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 650 >>
+stream
+BT
+/F1 14 Tf
+50 720 Td
+(AeroTech ATX200 Aircraft Maintenance Manual) Tj
+/F1 10 Tf
+0 -20 Td
+(Chapter 3: Engine System Operational Limits and Maintenance Procedures) Tj
+0 -15 Td
+(Table 3.1: Sensor Thresholds and Risk Assessment Matrix) Tj
+0 -15 Td
+(1. Engine Vibration: Warning Threshold = 3.1 mm/s, Critical Threshold = 4.5 mm/s) Tj
+0 -15 Td
+(   - If Engine Vibration > 3.1 mm/s: Monitor bearing assembly before next flight.) Tj
+0 -15 Td
+(   - If Engine Vibration > 4.5 mm/s: Ground aircraft immediately and inspect.) Tj
+0 -15 Td
+(2. Engine Temperature: Maximum Limit = 850 C) Tj
+0 -15 Td
+(3. Exhaust Gas Temperature EGT: Maximum Limit = 750 C) Tj
+0 -15 Td
+(4. Oil Temperature: Normal Range = 90 C - 105 C, High Warning = 110 C) Tj
+0 -15 Td
+(5. Oil Pressure: Minimum Operating Limit = 35 psi) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000244 00000 n 
+0000000319 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1020
+%%EOF
