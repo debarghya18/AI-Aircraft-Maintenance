@@ -165,16 +165,32 @@ def maintenance_prediction(payload: dict[str, Any]) -> dict[str, Any]:
 
         bedrock_client = boto3.client(**boto3_kwargs)
 
-        analyzer = AircraftMaintenanceAnalyzer(
-            bedrock_client=bedrock_client,
-            model_id=bedrock_model_id,
-            manual_pdf_path=manual_pdf_path,
-            temperature=0.2,
-            max_tokens=2_000,
-        )
+        model_candidates = [
+            os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-pro-v1:0"),
+            "amazon.nova-pro-v1:0",
+            "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+        ]
 
-        report = analyzer.analyze(engineering_json)
-        return {"success": True, "report": report}
+        last_error = None
+        for model_id in model_candidates:
+            try:
+                analyzer = AircraftMaintenanceAnalyzer(
+                    bedrock_client=bedrock_client,
+                    model_id=model_id,
+                    manual_pdf_path=manual_pdf_path,
+                    temperature=0.2,
+                    max_tokens=2_000,
+                )
+                report = analyzer.analyze(engineering_json)
+                return {"success": True, "report": report}
+            except Exception as exc:
+                last_error = exc
+                continue
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Maintenance prediction failed across models: {last_error}",
+        )
 
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
