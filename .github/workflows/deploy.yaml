@@ -115,7 +115,8 @@ jobs:
 
       - name: Update Backend Manifest
         run: |
-          sed -i "s|\${BACKEND_IMAGE}|$BACKEND_IMAGE|g" kubernetes/backend-deployment.yaml
+          if [ -f "kubernetes/backend-deployment.yaml" ]; then sed -i "s|\${BACKEND_IMAGE}|$BACKEND_IMAGE|g" kubernetes/backend-deployment.yaml; fi
+          if [ -f "kubernetes/backend_deployment.yaml" ]; then sed -i "s|\${BACKEND_IMAGE}|$BACKEND_IMAGE|g" kubernetes/backend_deployment.yaml; fi
 
       # ----------------------------------------------------
       # Replace Frontend Image
@@ -123,7 +124,8 @@ jobs:
 
       - name: Update Frontend Manifest
         run: |
-          sed -i "s|\${FRONTEND_IMAGE}|$FRONTEND_IMAGE|g" kubernetes/frontend-deployment.yaml
+          if [ -f "kubernetes/frontend-deployment.yaml" ]; then sed -i "s|\${FRONTEND_IMAGE}|$FRONTEND_IMAGE|g" kubernetes/frontend-deployment.yaml; fi
+          if [ -f "kubernetes/frontend_deployment.yaml" ]; then sed -i "s|\${FRONTEND_IMAGE}|$FRONTEND_IMAGE|g" kubernetes/frontend_deployment.yaml; fi
 
       # ----------------------------------------------------
       # Create / Update Kubernetes Secret
