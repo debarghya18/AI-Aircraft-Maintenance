@@ -1,18 +1,14 @@
-import React from 'react';
-
-export default function PanelCard({ title, subtitle, icon, children, className = '' }) {
+export default function PanelCard({ title, subtitle, children, accent = 'cyan', badge = null }) {
   return (
-    <div className={`glass-panel ${className}`}>
-      <div className="panel-header">
-        {icon && <span className="panel-icon">{icon}</span>}
+    <section className={`panel-card panel-${accent}`}>
+      <div className="panel-head">
         <div>
-          <h3 className="panel-title">{title}</h3>
-          {subtitle && <p className="panel-subtitle">{subtitle}</p>}
+          <h3>{title}</h3>
+          {subtitle ? <p>{subtitle}</p> : null}
         </div>
+        {badge || null}
       </div>
-      <div className="panel-body">
-        {children}
-      </div>
-    </div>
+      <div className="panel-body">{children}</div>
+    </section>
   );
 }

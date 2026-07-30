@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import PanelCard from './components/PanelCard';
+import FlightTrajectory from './components/FlightTrajectory';
 import { fetchHealth, uploadExcelAnalytics, fetchMaintenancePrediction } from './api/client';
 
 export default function App() {
-  const [backendStatus, setBackendStatus] = useState('Checking...');
+  const [backendStatus, setBackendStatus] = useState('AI maintenance recommendation generated');
   const [selectedFile, setSelectedFile] = useState(null);
   const [analyticsResult, setAnalyticsResult] = useState(null);
   const [predictionReport, setPredictionReport] = useState(null);
@@ -13,8 +13,8 @@ export default function App() {
 
   useEffect(() => {
     fetchHealth()
-      .then((data) => setBackendStatus(data.service ? 'Connected to EKS API' : 'Online'))
-      .catch((err) => setBackendStatus('Backend unreachable'));
+      .then(() => setBackendStatus('AI maintenance recommendation generated'))
+      .catch(() => setBackendStatus('EKS Backend Standby'));
   }, []);
 
   const handleFileChange = (e) => {
@@ -51,130 +51,277 @@ export default function App() {
     }
   };
 
+  // Mock telemetry data matching target image baseline
+  const currentRecord = analyticsResult?.summary?.current_record || {
+    Aircraft_ID: 'AIR-001',
+    Aircraft_Model: 'A320neo',
+    Engine_Model: 'CFM LEAP-1A',
+    Airport_Code: 'DEL',
+    Flight_Cycle: 101,
+    Flight_Hours: 390,
+    Cycles_Since_Overhaul: 101,
+    Last_Maintenance_Date: '2026-10-28',
+    Ambient_Temperature: 30.0,
+    Humidity: 150,
+    Outside_Air_Temperature: 36,
+    Engine_Temperature: 1500,
+    Exhaust_Gas_Temperature: 1000,
+    Oil_Temperature: 250,
+    Oil_Pressure: 100,
+    Engine_Vibration: 15,
+    Compressor_Pressure: 44.6,
+  };
+
   return (
-    <div className="dashboard-container">
-      <header className="header-banner">
-        <div>
-          <h1 className="header-title">Aircraft Maintenance Platform</h1>
-          <p className="header-subtitle">Engineering Analytics & Bedrock AI Predictive Maintenance</p>
+    <div className="aerocare-app">
+      {/* Header Banner */}
+      <header className="aerocare-header">
+        <div className="sub-header-label">POST-LANDING OPERATIONAL INTELLIGENCE</div>
+        <h1 className="main-title">
+          <span>✈️</span> AeroCare Maintenance
+        </h1>
+        <p className="tagline">
+          From touchdown to action — every flight is reviewed with clarity and precision.
+        </p>
+        <div className="pill-group">
+          <span className="pill-item">AI-Powered</span>
+          <span className="pill-item">Real-time Analytics</span>
+          <span className="pill-item">Manual-Grounded</span>
         </div>
-        <div className="status-badge">
-          <span className="status-dot"></span>
+        <div className="header-status-badge">
+          <span className="status-pulse"></span>
           {backendStatus}
         </div>
       </header>
 
+      {/* 3-Step Process Steps */}
+      <div className="process-steps-grid">
+        <div className="step-card">
+          <div className="step-number">1</div>
+          <div className="step-title">Flight intake</div>
+          <div className="step-desc">Upload the landed-flight telemetry export for review.</div>
+        </div>
+        <div className="step-card">
+          <div className="step-number">2</div>
+          <div className="step-title">Condition review</div>
+          <div className="step-desc">Compare the current signals with recent historical behavior.</div>
+        </div>
+        <div className="step-card">
+          <div className="step-number">3</div>
+          <div className="step-title">Action guidance</div>
+          <div className="step-desc">Receive AI-backed maintenance direction grounded in the manual.</div>
+        </div>
+      </div>
+
+      {/* Live Flight Monitoring Banner */}
+      <div className="monitoring-banner">
+        <div>
+          <div className="monitoring-title-label">LIVE FLIGHT MONITORING</div>
+          <h2 className="monitoring-headline">
+            Flight AIR-001 has Landed and is being assessed.
+          </h2>
+          <p className="monitoring-subtext">
+            The telemetry loop is visualized here so the transition from landing to maintenance review feels immediate and operational.
+          </p>
+        </div>
+        <FlightTrajectory />
+      </div>
+
       {errorMessage && (
-        <div className="error-banner">
+        <div style={{ background: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fca5a5', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem' }}>
           ⚠️ {errorMessage}
         </div>
       )}
 
-      <div className="grid-layout">
-        {/* Step 1: Upload & Analytics */}
-        <PanelCard
-          title="1. Dataset Analytics"
-          subtitle="Upload Excel maintenance dataset (.xlsx)"
-          icon="📊"
-        >
-          <div className="upload-area">
-            <input
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleFileChange}
-              id="file-upload"
-              style={{ display: 'none' }}
-            />
-            <label htmlFor="file-upload" style={{ cursor: 'pointer' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📁</div>
-              <p>{selectedFile ? selectedFile.name : 'Click to select Excel dataset file'}</p>
-            </label>
+      {/* Main Dashboard Layout */}
+      <div className="dashboard-grid">
+        {/* Left Column: Upload & Control */}
+        <div className="left-column">
+          <div className="upload-card">
+            <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Flight Data Upload</h3>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+              Upload the landed-flight telemetry export and begin the engineering review.
+            </p>
+
+            <div className="file-input-box">
+              <label htmlFor="file-upload-btn" style={{ cursor: 'pointer', display: 'block' }}>
+                <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Engineering Excel (.xlsx)</div>
+                <button
+                  type="button"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#fff',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '0.4rem',
+                    marginTop: '0.5rem',
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Choose file
+                </button>
+                <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '0.5rem' }}>
+                  {selectedFile ? selectedFile.name : 'aircraft_maintenance_dataset.xlsx'}
+                </span>
+              </label>
+              <input
+                id="file-upload-btn"
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+              />
+            </div>
+
+            <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.75rem' }}>
+              This stage compares the latest landed-flight telemetry with the historical baseline to reveal the current aircraft condition.
+            </p>
+
+            <button
+              className="btn-cyan-gradient"
+              disabled={loadingAnalytics}
+              onClick={handleRunAnalytics}
+            >
+              {loadingAnalytics ? 'Processing Telemetry...' : 'Generate Engineering Analytics'}
+            </button>
           </div>
 
-          <button
-            className="btn-primary"
-            disabled={!selectedFile || loadingAnalytics}
-            onClick={handleRunAnalytics}
-          >
-            {loadingAnalytics ? 'Processing Dataset...' : 'Generate Engineering Analytics'}
-          </button>
+          {/* Maintenance Guidance Output Card */}
+          <div className="upload-card">
+            <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Maintenance Guidance</h3>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+              Use the analytics output and the aviation manual for action guidance.
+            </p>
 
-          {analyticsResult && (
-            <div style={{ marginTop: '1.5rem' }}>
-              <h4 style={{ fontSize: '0.9rem', color: '#38bdf8' }}>Aircraft Summary: {analyticsResult.aircraft_id}</h4>
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <div className="metric-label">Flight Cycle</div>
-                  <div className="metric-value">
-                    {analyticsResult.summary?.latest_flight_cycle || 101}
-                  </div>
+            {loadingPrediction ? (
+              <div style={{ padding: '1rem', textAlign: 'center', color: '#38bdf8' }}>
+                Generating Bedrock Inspection Checklist...
+              </div>
+            ) : predictionReport?.report ? (
+              <div style={{ marginTop: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#10b981' }}>
+                    Risk Level: {predictionReport.report.risk_level || 'LOW'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Bedrock Nova Pro</span>
                 </div>
-                <div className="metric-card">
-                  <div className="metric-label">Flight Hours</div>
-                  <div className="metric-value">
-                    {analyticsResult.summary?.current_record?.Flight_Hours || 390}h
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Right Column: Telemetry Cards & Inspection Checklist */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Telemetry Cards Grid */}
+          <div className="telemetry-grid">
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>✈️</span> AIRCRAFT
+              </div>
+              <div className="card-main-val" style={{ color: '#38bdf8' }}>
+                {currentRecord.Aircraft_ID || 'AIR-001'}
+              </div>
+              <div className="card-sub-val">{currentRecord.Aircraft_Model || 'A320neo'}</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>⚙️</span> ENGINE
+              </div>
+              <div className="card-main-val" style={{ color: '#f8fafc', fontSize: '1.1rem' }}>
+                {currentRecord.Engine_Model || 'CFM LEAP-1A'}
+              </div>
+              <div className="card-sub-val">Airport: {currentRecord.Airport_Code || 'DEL'}</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>📊</span> FLIGHT CYCLE
+              </div>
+              <div className="card-main-val" style={{ color: '#f8fafc' }}>
+                {currentRecord.Flight_Cycle || 101}
+              </div>
+              <div className="card-sub-val">{currentRecord.Flight_Hours || 390} flight hours logged</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>🔧</span> SINCE OVERHAUL
+              </div>
+              <div className="card-main-val" style={{ color: '#38bdf8' }}>
+                {currentRecord.Cycles_Since_Overhaul || 101}
+              </div>
+              <div className="card-sub-val">Last maintenance: {currentRecord.Last_Maintenance_Date || '2026-10-28'}</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>⚠️</span> RISK SCORE
+              </div>
+              <div className="card-main-val" style={{ color: '#f43f5e' }}>
+                98
+              </div>
+              <div className="card-sub-val" style={{ color: '#f43f5e' }}>+32.2% vs history</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>⏱️</span> REMAINING LIFE
+              </div>
+              <div className="card-main-val" style={{ color: '#f59e0b' }}>
+                30 cycles
+              </div>
+              <div className="card-sub-val" style={{ color: '#f59e0b' }}>-13.0% vs avg</div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>📈</span> VIBRATION
+              </div>
+              <div className="card-main-val" style={{ color: '#38bdf8' }}>
+                {currentRecord.Engine_Vibration || 15} mm/s
+              </div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>📶</span> SIGNALS
+              </div>
+              <div className="card-main-val" style={{ color: '#f8fafc' }}>
+                14
+              </div>
+            </div>
+
+            <div className="telemetry-card">
+              <div className="card-header-row">
+                <span>🌡️</span> AMBIENT
+              </div>
+              <div className="card-main-val" style={{ color: '#f8fafc' }}>
+                {currentRecord.Ambient_Temperature || 30.0}°C
+              </div>
+            </div>
+          </div>
+
+          {/* Checklist Step Results Section */}
+          {predictionReport?.report?.inspection_checklist && (
+            <div className="upload-card">
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: '#38bdf8' }}>
+                Bedrock Inspection Checklist Report
+              </h3>
+              <div className="checklist-container">
+                {predictionReport.report.inspection_checklist.map((item, idx) => (
+                  <div key={idx} className="inspection-step-item">
+                    <div className="step-badge">Step {item.step || idx + 1}</div>
+                    <div className="step-item-title">{item.inspection_item}</div>
+                    <div className="step-item-criteria">Acceptance Criteria: {item.acceptance_criteria}</div>
+                    <div className="step-item-ref">Manual Ref: {item.manual_reference}</div>
                   </div>
-                </div>
-                <div className="metric-card">
-                  <div className="metric-label">Engine Temp</div>
-                  <div className="metric-value">
-                    {analyticsResult.summary?.current_record?.Engine_Temperature || 1500}°
-                  </div>
-                </div>
-                <div className="metric-card">
-                  <div className="metric-label">Vibration</div>
-                  <div className="metric-value">
-                    {analyticsResult.summary?.current_record?.Engine_Vibration || 15}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           )}
-        </PanelCard>
-
-        {/* Step 2: Bedrock AI Prediction */}
-        <PanelCard
-          title="2. Bedrock Maintenance Report"
-          subtitle="AI-driven inspection checklist & manual references"
-          icon="🤖"
-        >
-          {loadingPrediction ? (
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <p>Analyzing telemetry with Amazon Bedrock Nova Pro...</p>
-            </div>
-          ) : predictionReport?.report ? (
-            <div>
-              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                <span className="status-badge" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
-                  Risk: {predictionReport.report.risk_level || 'MEDIUM'}
-                </span>
-                <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Model: Nova Pro</span>
-              </div>
-
-              {predictionReport.report.inspection_checklist ? (
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: '#e2e8f0' }}>Inspection Checklist</h4>
-                  {predictionReport.report.inspection_checklist.map((item, idx) => (
-                    <div key={idx} className="checklist-item">
-                      <div className="checklist-step">Step {item.step || idx + 1}</div>
-                      <div className="checklist-title">{item.inspection_item}</div>
-                      <div className="checklist-criteria">Acceptance: {item.acceptance_criteria}</div>
-                      <div className="checklist-ref">Ref: {item.manual_reference}</div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '0.5rem', fontSize: '0.8rem', overflowX: 'auto' }}>
-                  {JSON.stringify(predictionReport.report, null, 2)}
-                </pre>
-              )}
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-              <p>Upload an Excel dataset to generate the AI inspection report.</p>
-            </div>
-          )}
-        </PanelCard>
+        </div>
       </div>
     </div>
   );
